@@ -1,0 +1,867 @@
+\
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photography Portfolio</title>
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --text-color: #c5c6c7;
+            --accent-color: #66fcf1;
+            --card-bg: #1f2833;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 50px 0 30px 0;
+        }
+
+        header h1 {
+            color: var(--white);
+            font-size: 2.3rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            font-size: 0.95rem;
+            color: var(--accent-color);
+            letter-spacing: 1px;
+        }
+
+        /* --- LAYER 1: ALBUM COVERS --- */
+        .album-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        .album-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .album-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(102, 252, 241, 0.2);
+        }
+
+        .album-cover-img {
+            width: 100%;
+            height: 380px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .album-info {
+            padding: 20px;
+            text-align: center;
+            background: var(--card-bg);
+        }
+
+        .album-info h2 {
+            color: var(--white);
+            font-size: 1.3rem;
+            letter-spacing: 1px;
+        }
+
+        /* --- LAYER 2: COLLAGE VIEW (WIX-STYLE MASONRY) --- */
+        .session-view {
+            display: none;
+        }
+
+        .session-view.active {
+            display: block;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .back-btn {
+            background: transparent;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            font-weight: bold;
+        }
+
+        .session-title-block {
+            margin-bottom: 40px;
+        }
+
+        .session-title-block h2 {
+            color: var(--white);
+            font-size: 2rem;
+        }
+
+        /* Real Responsive Masonry - No Image Cropping */
+        .collage-grid {
+            column-count: 3;
+            column-gap: 15px;
+            width: 100%;
+        }
+
+        .collage-item {
+            background-color: var(--card-bg);
+            margin-bottom: 15px;
+            break-inside: avoid;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            cursor: zoom-in;
+            display: block;
+        }
+
+        .collage-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.4s ease;
+        }
+
+        .collage-item:hover img {
+            transform: scale(1.03);
+        }
+
+        /* Responsive Breakpoints for Masonry Columns */
+        @media (max-width: 900px) {
+            .collage-grid {
+                column-count: 2;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .collage-grid {
+                column-count: 1;
+            }
+        }
+
+        /* --- LIGHTBOX MODAL --- */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .lightbox.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 85%;
+            object-fit: contain;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 25px;
+            right: 35px;
+            color: var(--white);
+            font-size: 45px;
+            cursor: pointer;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div id="mainHub">
+            <header>
+                <h1>Kalhaar Savaj Photography</h1>
+                <p>Select a collection to view the full gallery</p>
+            </header>
+            <main class="album-grid" id="albumGridContainer"></main>
+        </div>
+
+        <div id="dynamicSessionView" class="session-view">
+            <button class="back-btn" onclick="showHub()">← Back to Galleries</button>
+            <div class="session-title-block">
+                <h2 id="currentAlbumTitle">Album Name</h2>
+            </div>
+            <div class="collage-grid" id="collageGridContainer"></div>
+        </div>
+    </div>
+
+    <div id="lightboxModal" class="lightbox" onclick="closePhoto()">
+        <span class="lightbox-close">&times;</span>
+        <img class="lightbox-content" id="lightboxImg" src="" alt="Enlarged Visual">
+    </div>
+
+    <script>
+        // =========================================================================
+        // PASTE YOUR RAW ARRAY OUTPUT FROM "portfolio_data_export.txt" RIGHT HERE:
+        // =========================================================================
+        const GALLERY_DATA = [
+
+            {
+                "albumTitle": "Prashant - Sara",
+                "coverImageId": "1xcRf5e5SqN12N0ZKH1jXw1NfCM-5wdBY",
+                "photos": [
+                    {
+                        "id": "1xcRf5e5SqN12N0ZKH1jXw1NfCM-5wdBY",
+                        "name": "DSC00344.jpg"
+                    },
+                    {
+                        "id": "14tmOiyP5PEmCCwER_IUN-UUYRCYqvBS2",
+                        "name": "IMG_4443.JPG"
+                    },
+                    {
+                        "id": "1kjiUuWc5I9Uv0WazrWMth2eiU4Gw_AMP",
+                        "name": "DSC08962.jpg"
+                    },
+                    {
+                        "id": "1NXsEgvVZk2nK1h0swRiAh2QIlNi2pQHO",
+                        "name": "DSC08892.jpg"
+                    },
+                    {
+                        "id": "1PoXlvA0Orz0WL2U57K4A63Q1suctLd5B",
+                        "name": "Joyful Couple.jpg"
+                    },
+                    {
+                        "id": "1nMlPFD6ZgPU7PVCVbmsqGp1us1y3tZ3U",
+                        "name": "The First Kiss.jpg"
+                    },
+                    {
+                        "id": "1_LAoB0NnpAyoIGmmNffMmq51o6NZ34WS",
+                        "name": "Showering Flowers.jpg"
+                    },
+                    {
+                        "id": "1XdEK3v9mWxjCaMctD7BAoItoc5JIvGdx",
+                        "name": "Bride Prep.jpg"
+                    },
+                    {
+                        "id": "1NCeC2a6CZUJ2vDcU5j2_7XnLbckHdwF7",
+                        "name": "DSC09481.jpg"
+                    },
+                    {
+                        "id": "1AtFz2RKhl6aAEAg6rZ-a1LR2yq76wbEv",
+                        "name": "DSC09339.jpg"
+                    },
+                    {
+                        "id": "1cPT-VorIYUMVTSyM9L2YtR-tI5b90OKm",
+                        "name": "DSC09309.jpg"
+                    },
+                    {
+                        "id": "1Da8kxggF_nT3qRZgaRwtT-VmJtn2GRze",
+                        "name": "DSC09007.jpg"
+                    },
+                    {
+                        "id": "1c5R0aGOotjw_Z7MU20w_xI_mdSVnDrfh",
+                        "name": "DSC09647.jpg"
+                    },
+                    {
+                        "id": "1Zdk06vnN1thc6MrrZcruqWJ1nn5XC7VK",
+                        "name": "DSC09558.jpg"
+                    },
+                    {
+                        "id": "1KdtJtCaR33DtOhR_VbY_CuW17F5AzTpu",
+                        "name": "DSC09666.jpg"
+                    },
+                    {
+                        "id": "1fhNwklCBTGkrRcgk0oByN-VGiIRsZz29",
+                        "name": "DSC09248.jpg"
+                    },
+                    {
+                        "id": "1BpmW5LMcPvj4tKRIKVdiL0vosheMRhZ4",
+                        "name": "DSC09507.jpg"
+                    },
+                    {
+                        "id": "1FNLKg5CTY5nhgQzTeO7-nyZgnwCYVUBj",
+                        "name": "DSC09663.jpg"
+                    }
+                ]
+            },
+            {
+                "albumTitle": "Dhruvi - Ashish",
+                "coverImageId": "1HOsRdQoiwp59xpN1BFkmuLwx6aNwT8G9",
+                "photos": [
+                    {
+                        "id": "1Fn4U5jlulrQTJ3P2rMJdDaZ1NYq8y5lA",
+                        "name": "DSC09833.jpg"
+                    },
+                    {
+                        "id": "1HOsRdQoiwp59xpN1BFkmuLwx6aNwT8G9",
+                        "name": "DSC09790.jpg"
+                    },
+                    {
+                        "id": "1HG20OALADwTKRiClmIImPY4dI5nRutiw",
+                        "name": "DSC09819.jpg"
+                    },
+                    {
+                        "id": "1IzFWrE00olR-WLAYNE9C14B1-DlkpdyG",
+                        "name": "DSC09811.jpg"
+                    },
+                    {
+                        "id": "10hl0BiZBT9c9Mea-nsDkzG5m7UyR2LiJ",
+                        "name": "DSC09690.jpg"
+                    },
+                    {
+                        "id": "1iNzS5zmyN8PWxaZOs7FMbZxtC9TJUuue",
+                        "name": "light-full.jpg"
+                    }
+                ]
+            },
+            {
+                "albumTitle": "Mehul Barot",
+                "coverImageId": "1WzQD4hEiklqimMSmy1Pg5qGO4BPcsaWf",
+                "photos": [
+                    {
+                        "id": "1HF72kd-G2qWRI5gu0eyNvCunlY0CFUu9",
+                        "name": "Family.jpg"
+                    },
+                    {
+                        "id": "1vN4CET3A6Dl-4t1P_DIB7uxU8XO7HSp0",
+                        "name": "Unseen Kiss 2.jpg"
+                    },
+                    {
+                        "id": "1tRHuyL6SaZXdDzjizvgOvYht2f5548HN",
+                        "name": "Like Daughter, Like Mother.jpg"
+                    },
+                    {
+                        "id": "1vTS8jdfvwx8kl5TNvP0FZLKZnIX83jg9",
+                        "name": "look into me.jpg"
+                    },
+                    {
+                        "id": "1EeCqPciz5gYIoMsUlilYxzcYfcMYvntr",
+                        "name": "Portrait .jpg"
+                    },
+                    {
+                        "id": "12UVn_VldSTVgPBYhB12xGi3sqTvLx5pj",
+                        "name": "Hold my hand, hold my baby.jpg"
+                    },
+                    {
+                        "id": "1SyQqFoMWkkKAWqmSmLDaBGvILT_VqggV",
+                        "name": "Hiding the kiss.jpg"
+                    },
+                    {
+                        "id": "1S2vN30iBzjkNfRuUi3vtPUO2r_PqzivZ",
+                        "name": "The Couple.jpg"
+                    },
+                    {
+                        "id": "1RRaCUD-swrKqL8Zi2Eqh-RxKqRsetlnE",
+                        "name": "The Sleeping Portrait .jpg"
+                    },
+                    {
+                        "id": "1ufK6Y01x4WH6VpPZiAj3SXyAnUPqBMy9",
+                        "name": "Snow Girl.jpg"
+                    },
+                    {
+                        "id": "17D2R1lekWGVKpSMBej6wss-ADEUFD-F7",
+                        "name": "The X-ray Infant.jpg"
+                    },
+                    {
+                        "id": "11YzCNgQn_jV40jV9g72gG4wPLu2SMlsc",
+                        "name": "Father’s Kiss.jpg"
+                    },
+                    {
+                        "id": "18eeFVnnmNPS-KAk_IRoUwH0jmbpnjmeP",
+                        "name": "The Snow Kiss.jpg"
+                    },
+                    {
+                        "id": "1V3zS82rCbaQJbbS8ESye4pi4Ycn0-iHr",
+                        "name": "Blowing Balloon.jpg"
+                    },
+                    {
+                        "id": "1zsXZFTAOQQyrGpGEUuLucEsfH1sCSpiU",
+                        "name": "Pink Framed.jpeg"
+                    },
+                    {
+                        "id": "1WzQD4hEiklqimMSmy1Pg5qGO4BPcsaWf",
+                        "name": "Framed Kiss.jpeg"
+                    },
+                    {
+                        "id": "1qg_JTAe_FrwQUot4kWkF0rhLtX8gU9TD",
+                        "name": "The Family .jpeg"
+                    },
+                    {
+                        "id": "1LIl2eF-62wK3xBZRFYU2Nx3AZQjjlR4o",
+                        "name": "The Happy Family.jpg"
+                    },
+                    {
+                        "id": "1qqU97ixtxt4TR8nbmGqPNfw8hXSvlW-w",
+                        "name": "Locked.jpg"
+                    }
+                ]
+            },
+            {
+                "albumTitle": "Deva - Sanidhya",
+                "coverImageId": "1S6oB7RyBTal0OxXEX_PL2xB2mLsy7qCb",
+                "photos": [
+                    {
+                        "id": "1P8r6hOYyLNIa2QPy0ePwjegHqv_4hEIt",
+                        "name": "DSC05087.jpg"
+                    },
+                    {
+                        "id": "1nJOtzEbSgiQP0TOdEj_N3MRT-pQ5PeCm",
+                        "name": "DSC05061-2.jpg"
+                    },
+                    {
+                        "id": "1xxv99h-2N0-CNcFdpScdGeaqLA-quhCW",
+                        "name": "DSC05697-2.jpg"
+                    },
+                    {
+                        "id": "1dqMi2xfFdhNyYA9MDj9KG8q2ecc6zQFq",
+                        "name": "DSC05164-Enhanced-NR.jpg"
+                    },
+                    {
+                        "id": "1jB4XJXQhhOii9OWkBpEaNY_ypQdICOhF",
+                        "name": "DSC05693.jpg"
+                    },
+                    {
+                        "id": "1S6oB7RyBTal0OxXEX_PL2xB2mLsy7qCb",
+                        "name": "DSC05599.jpg"
+                    },
+                    {
+                        "id": "1sqDTLSw2uw2wKrcNJ8HPl2-3RxXNJRon",
+                        "name": "DSC05555.jpg"
+                    },
+                    {
+                        "id": "1hx_FhzW67CxXUgCNquT1r7JjrYnQ2xFM",
+                        "name": "DSC05539.jpg"
+                    },
+                    {
+                        "id": "1cxqgBNuah4UVoKvxvCWnhD0VCjEpdTKT",
+                        "name": "DSC05533.jpg"
+                    },
+                    {
+                        "id": "1eCSxey1rdUk2JywVW72PPjxRl1S3olm-",
+                        "name": "DSC05510.jpg"
+                    },
+                    {
+                        "id": "1VPqdmzmVyDnXs1Mc1Cy9fxGT6ubWuev2",
+                        "name": "DSC05511.jpg"
+                    },
+                    {
+                        "id": "1xwbFOXKjATAPvWDIVJqiJIH3QRfGlnoc",
+                        "name": "DSC05109.jpg"
+                    },
+                    {
+                        "id": "13viIY8XVxYB0FXlFIwgy1AJCgo3pgBjm",
+                        "name": "DSC05050.jpg"
+                    },
+                    {
+                        "id": "1LskTwCkcoR-SylInnhnEs9mrbIL0HAKu",
+                        "name": "DSC05061.jpg"
+                    }
+                ]
+            },
+
+
+            {
+                "albumTitle": "Anamika Family Photoshoot ",
+                "coverImageId": "1sDHiYJE-wWnikKtTGLnQOKM7ITSoZrdf",
+                "photos": [
+                    {
+                        "id": "1PH_qbhiIJrbYD68Vw8gGKpjcxj-ZWsZD",
+                        "name": "Edited.jpg"
+                    },
+                    {
+                        "id": "1Irdp6GQYRGfcSZSy-Rgbmw1rkriEBnv1",
+                        "name": "DSC08625.jpg"
+                    },
+                    {
+                        "id": "1sDHiYJE-wWnikKtTGLnQOKM7ITSoZrdf",
+                        "name": "DSC08277.jpg"
+                    },
+                    {
+                        "id": "1wxIRt1SMzi_g-WVBWPe88m1d0HwRtDTR",
+                        "name": "DSC08257.jpg"
+                    }
+                ]
+            },
+            {
+                "albumTitle": "Ademola Photoshoot",
+                "coverImageId": "1fU0lJ59z8n-C8RIQUwbRMNRXltVv-BzC",
+                "photos": [
+                    {
+                        "id": "1HJquB84afKjWutb1_Ah6k4E-0yymcmEQ",
+                        "name": "DSC05299.jpg"
+                    },
+                    {
+                        "id": "1fU0lJ59z8n-C8RIQUwbRMNRXltVv-BzC",
+                        "name": "DSC05287.jpg"
+                    },
+                    {
+                        "id": "1U33LlW3DyiwGoxWauruocngWLZ2KTSMj",
+                        "name": "DSC05088.jpg"
+                    },
+                    {
+                        "id": "1-ztgpv58D7NqB5t2YyA7awJ-7m3_p3KC",
+                        "name": "DSC05263.jpg"
+                    },
+                    {
+                        "id": "1hz83FmkGvQ-Pa14j9Kja7_dSGo0r6bqa",
+                        "name": "DSC05125.jpg"
+                    },
+                    {
+                        "id": "1r6R7SRkd-fa1xETRgJs_ngtJRZOf1Bp5",
+                        "name": "DSC04963.jpg"
+                    },
+                    {
+                        "id": "1XkHwBRIvzlu2UhJIvtSpDBLC3n74ENZ8",
+                        "name": "DSC04922.jpg"
+                    },
+                    {
+                        "id": "1e6TkzNlmtkX24oWYkrxByrL4AtdK2h3y",
+                        "name": "DSC04857.jpg"
+                    },
+                    {
+                        "id": "1TAYaYNB-qHgNOTr9zAUYN19T00lpEW3Q",
+                        "name": "DSC05016.jpg"
+                    },
+                    {
+                        "id": "1YeY22Gz8WVTs_vYC3Ge8YMHDJEBaTdPy",
+                        "name": "DSC05335.jpg"
+                    },
+                    {
+                        "id": "1nsIZJxzfKxfYOPMht0zs4_YD9LhvoWYe",
+                        "name": "DSC05125.jpg"
+                    },
+                    {
+                        "id": "1oXP60eyBWw96STEmIhDoD2RLEMnSnoJ7",
+                        "name": "DSC04904.jpg"
+                    },
+                    {
+                        "id": "1hDCDrXALOBu1AELanqXiMgIqaeGkSc-L",
+                        "name": "DSC04999.jpg"
+                    },
+                    {
+                        "id": "1RsiU1ONYC_vqMv4ynLfe7R3tcinJavYF",
+                        "name": "DSC05057.jpg"
+                    },
+                    {
+                        "id": "1OLjMGG8FdJGurOnARiVjM4mo-ERwRMiN",
+                        "name": "DSC04957.jpg"
+                    },
+                    {
+                        "id": "1BUrvCeo-7BO7MWpwC6usENalaAGb0MMo",
+                        "name": "DSC04834.jpg"
+                    },
+                    {
+                        "id": "1IaJWtaWJwQYne_k9fXwwNjEbeLG90L6p",
+                        "name": "DSC04894.jpg"
+                    },
+                    {
+                        "id": "1ovdkuNK9CK9XfKjHnIqp5Nj-qV1MBIf1",
+                        "name": "DSC04847.jpg"
+                    },
+                    {
+                        "id": "12XHLdDUk3PXxocKsECpJP3ushdgzpdN1",
+                        "name": "DSC04937.jpg"
+                    },
+                    {
+                        "id": "1cRARzXw5sOIRXol5k3nucIdkZo-1qq5q",
+                        "name": "DSC04727.jpg"
+                    },
+                    {
+                        "id": "1P0OeyWpnHaq-A3-6cimSmfcp6N88vzE0",
+                        "name": "DSC04775.jpg"
+                    },
+                    {
+                        "id": "1J2j9-b0_8gO1PO45qbELIFplbFiEpr-Z",
+                        "name": "DSC04866.jpg"
+                    },
+                    {
+                        "id": "17tkKCYbx5QD_Y4O7982oWUQRlUTS5_QI",
+                        "name": "DSC04808.jpg"
+                    },
+                    {
+                        "id": "1LbQt4F8ei4nvXpu70voWBn8BeJbFvqKy",
+                        "name": "DSC04689.jpg"
+                    }
+                ]
+            },
+            {
+                "albumTitle": "Bhargava Sneha",
+                "coverImageId": "1LhaecOYRzpttRBH0-fYeDnkAipBMm2qK",
+                "photos": [
+                    {
+                        "id": "1W3EZDif2rs1-H7ajyMCLNTpfuJWkJHfk",
+                        "name": "DSC05710.jpg"
+                    },
+                    {
+                        "id": "1TmIVJ2l-xBq-m2n_sxsRRz9Km6N7PvFb",
+                        "name": "DSC05780.jpg"
+                    },
+                    {
+                        "id": "1YDzIDM220D5Q8ZzOmBndPHt6oNoAut3x",
+                        "name": "DSC05846.jpg"
+                    },
+                    {
+                        "id": "1Ca4mDxYlLYeTzdvvHEoDJUOHluxBXHH-",
+                        "name": "DSC05992.jpg"
+                    },
+                    {
+                        "id": "17EuYwqRZmTKDn7ZdWH4Kfi03MWTsrgQD",
+                        "name": "DSC05659.jpg"
+                    },
+                    {
+                        "id": "17zDoNBC_T3KmbnPul5ckDYpk3mrkNtWz",
+                        "name": "DSC06136.jpg"
+                    },
+                    {
+                        "id": "1QmFj91mwEqb7ZGOHFzvNoVWHEp8Vdv5N",
+                        "name": "DSC06058.jpg"
+                    },
+                    {
+                        "id": "1TP0SM13ZFTTnQ6_xN3ApnXioJU-aRM22",
+                        "name": "DSC05965.jpg"
+                    },
+                    {
+                        "id": "1O2ckSo0LzXjjQaxugo96A_nDxzFJDSNe",
+                        "name": "DSC06084.jpg"
+                    },
+                    {
+                        "id": "1LhaecOYRzpttRBH0-fYeDnkAipBMm2qK",
+                        "name": "DSC05904.jpg"
+                    },
+                    {
+                        "id": "1DriczkJSPiyIkNUiuxkDUWpcrl0RNYu0",
+                        "name": "DSC05998.jpg"
+                    }
+                ]
+            },
+            {
+                "albumTitle": "Ademola Birthday",
+                "coverImageId": "1brkeVuxOF-cZcaofRT93ePKjATDFd0eQ",
+                "photos": [
+
+                    {
+                        "id": "1jrmXg61EFwfbelZjoCOkETWoDXr_RIqY",
+                        "name": "DSC01340-2.jpg"
+                    },
+                    {
+                        "id": "1ih8e6z8ODApE5ZmIj5vB0_4GAW792S9b",
+                        "name": "DSC01292-2.jpg"
+                    },
+                    {
+                        "id": "14AcUh-8GijAVyXBiIz5x48mkcEMH59XE",
+                        "name": "DSC01345-2.jpg"
+                    },
+                    {
+                        "id": "185Bl_QwLqQUnqJfCbr0wig3WiDZorDbV",
+                        "name": "DSC01345-2 (1).jpg"
+                    },
+                    {
+                        "id": "1NnKAH1dJUOfxt6iVxhNkFlf-gLJM4MJP",
+                        "name": "DSC01901.jpg"
+                    },
+                    {
+                        "id": "1ydpf3vjZwkmp1Ec8hMY1Cn6jpWA0ImJK",
+                        "name": "DSC02136.jpg"
+                    },
+                    {
+                        "id": "1BfokoV-UuPN2QYvdtT-NIGisRM8lqcGH",
+                        "name": "DSC01837.jpg"
+                    },
+                    {
+                        "id": "1YXhzjElzVqxcm3Wj51LQqEJMdWUg-O4W",
+                        "name": "DSC01846.jpg"
+                    },
+                    {
+                        "id": "1XoTGcM8hkIOp-PS7HkZqaZdfpZs0ygUD",
+                        "name": "DSC01791.jpg"
+                    },
+                    {
+                        "id": "1hvZkrh7aAw52j3oRR8L5204x9BdEPnWW",
+                        "name": "DSC01818.jpg"
+                    },
+                    {
+                        "id": "1JQ52bCrgJ52oSAhJlOy4MJLYoGbgvKc5",
+                        "name": "DSC01637.jpg"
+                    },
+                    {
+                        "id": "1brkeVuxOF-cZcaofRT93ePKjATDFd0eQ",
+                        "name": "DSC01569.jpg"
+                    },
+                    {
+                        "id": "1_HEB3MoID5vNKv0W13UEk5uq_Yzd8_ex",
+                        "name": "DSC01449.jpg"
+                    },
+                    {
+                        "id": "1d6pbmyDDINzG1OaK9jd-5VAv77qn7Etq",
+                        "name": "DSC01357.jpg"
+                    },
+                    {
+                        "id": "1yi_-uqHjbbOxod6nu1gnM_hA3K2q2Qew",
+                        "name": "DSC01362.jpg"
+                    },
+                    {
+                        "id": "1NOP1KiBqBS4z9FtQ0sE9-axOKPSn7IxU",
+                        "name": "DSC01318.jpg"
+                    }
+                ]
+            },
+            {
+                "albumTitle": "Gunjan - Vidhi",
+                "coverImageId": "1rktOaPVdP9RjRmjhwDGoJrqCngy15Khe",
+                "photos": [
+                    {
+                        "id": "1rktOaPVdP9RjRmjhwDGoJrqCngy15Khe",
+                        "name": "IMG_7941~2.JPG"
+                    }
+                ]
+            },
+
+            {
+                "albumTitle": "Sagar - Vaibhavi",
+                "coverImageId": "126KF5cBtTMAbgHDeXJkmliRXLxU9PkQt",
+                "photos": [
+                    {
+                        "id": "126KF5cBtTMAbgHDeXJkmliRXLxU9PkQt",
+                        "name": "DSC02047.jpg"
+                    },
+                    {
+                        "id": "1h7chIrs-_tElF1PgSw8IfPMHHKQVFZ4F",
+                        "name": "DSC02933.jpg"
+                    },
+                    {
+                        "id": "1nzwW03fU41_70i5fYT8gwz04knxbyINC",
+                        "name": "DSC02884.jpg"
+                    },
+                    {
+                        "id": "1WbaU5ztZ0V1MhXfijt9S0fcOyalMVNhG",
+                        "name": "DSC02915.JPG"
+                    },
+                    {
+                        "id": "1i4aT7ByYANXgTClmOXJkFrKO6sQx3GQM",
+                        "name": "DSC02909.JPG"
+                    },
+                    {
+                        "id": "1Ky-Jwaj1GP6aKFNNCGntc_jH_OMbHNHc",
+                        "name": "DSC02976.JPG"
+                    }
+                ]
+            }
+        ];
+        // =========================================================================
+
+        // Rendering Core UI Logic
+        function renderPortfolioHub() {
+            const grid = document.getElementById('albumGridContainer');
+            grid.innerHTML = '';
+
+            GALLERY_DATA.forEach((album, index) => {
+                const coverUrl = `https://drive.google.com/thumbnail?id=${album.coverImageId}&sz=w800`;
+
+                const card = document.createElement('div');
+                card.className = 'album-card';
+                card.onclick = () => openAlbum(index);
+                card.innerHTML = `
+                    <img class="album-cover-img" src="${coverUrl}" alt="${album.albumTitle}">
+                    <div class="album-info">
+                        <h2>${album.albumTitle}</h2>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function openAlbum(index) {
+            const album = GALLERY_DATA[index];
+            document.getElementById('mainHub').style.display = 'none';
+
+            document.getElementById('currentAlbumTitle').innerText = album.albumTitle;
+            const collageContainer = document.getElementById('collageGridContainer');
+            collageContainer.innerHTML = '';
+
+            album.photos.forEach((photo) => {
+                const thumbUrl = `https://drive.google.com/thumbnail?id=${photo.id}&sz=w800`;
+                const fullUrl = `https://drive.google.com/thumbnail?id=${photo.id}&sz=w1600`;
+
+                const item = document.createElement('div');
+                item.className = 'collage-item';
+                item.onclick = () => viewPhoto(fullUrl);
+                item.innerHTML = `<img src="${thumbUrl}" alt="${photo.name}" loading="lazy">`;
+
+                collageContainer.appendChild(item);
+            });
+
+            document.getElementById('dynamicSessionView').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showHub() {
+            document.getElementById('dynamicSessionView').classList.remove('active');
+            document.getElementById('mainHub').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function viewPhoto(url) {
+            document.getElementById('lightboxImg').src = url;
+            document.getElementById('lightboxModal').classList.add('active');
+        }
+
+        function closePhoto() {
+            document.getElementById('lightboxModal').classList.remove('active');
+        }
+
+        // Initialize Layout on Window Load
+        document.addEventListener("DOMContentLoaded", renderPortfolioHub);
+    </script>
+</body>
+
+</html>
