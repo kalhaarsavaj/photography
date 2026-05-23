@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,12 +11,13 @@
             --accent-color: #66fcf1;
             --card-bg: #1f2833;
             --white: #ffffff;
+            --dark-gray: #121212;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
         }
 
         body {
@@ -26,210 +26,329 @@
             color: var(--text-color);
             padding: 20px;
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
-        .container {
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 20px; 
+        }
+
+        /* --- NAVIGATION BAR --- */
+        nav {
+            display: flex;
+            justify-content: flex-end;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 10px 20px 0 20px;
         }
 
-        header {
-            text-align: center;
-            padding: 50px 0 30px 0;
-        }
-
-        header h1 {
-            color: var(--white);
-            font-size: 2.3rem;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-
-        header p {
-            font-size: 0.95rem;
+        .nav-link {
             color: var(--accent-color);
-            letter-spacing: 1px;
+            text-decoration: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--white);
+        }
+
+        header { 
+            text-align: center; 
+            padding: 30px 0 40px 0; 
+        }
+        
+        header h1 { 
+            color: var(--white); 
+            font-size: 2.3rem; 
+            letter-spacing: 3px; 
+            text-transform: uppercase; 
+            margin-bottom: 8px; 
+        }
+        
+        header p { 
+            font-size: 0.95rem; 
+            color: var(--accent-color); 
+            letter-spacing: 1px; 
         }
 
         /* --- LAYER 1: ALBUM COVERS --- */
-        .album-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 30px;
+        .album-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
+            gap: 30px; 
         }
-
-        .album-card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
-            cursor: pointer;
-            transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        
+        .album-card { 
+            background-color: var(--card-bg); 
+            border-radius: 8px; 
+            overflow: hidden; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4); 
+            cursor: pointer; 
+            transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); 
         }
-
-        .album-card:hover {
-            transform: scale(1.02);
-            box-shadow: 0 15px 30px rgba(102, 252, 241, 0.2);
+        
+        .album-card:hover { 
+            transform: scale(1.02); 
+            box-shadow: 0 15px 30px rgba(102, 252, 241, 0.2); 
         }
-
-        .album-cover-img {
-            width: 100%;
-            height: 380px;
-            object-fit: cover;
-            display: block;
+        
+        .album-cover-img { 
+            width: 100%; 
+            height: 380px; 
+            object-fit: cover; 
+            display: block; 
         }
-
-        .album-info {
-            padding: 20px;
-            text-align: center;
-            background: var(--card-bg);
+        
+        .album-info { 
+            padding: 20px; 
+            text-align: center; 
+            background: var(--card-bg); 
         }
-
-        .album-info h2 {
-            color: var(--white);
-            font-size: 1.3rem;
-            letter-spacing: 1px;
+        
+        .album-info h2 { 
+            color: var(--white); 
+            font-size: 1.3rem; 
+            letter-spacing: 1px; 
         }
 
         /* --- LAYER 2: COLLAGE VIEW (WIX-STYLE MASONRY) --- */
-        .session-view {
-            display: none;
+        .session-view { 
+            display: none; 
+        }
+        
+        .session-view.active { 
+            display: block; 
+            animation: fadeIn 0.4s ease forwards; 
+        }
+        
+        .back-btn { 
+            background: transparent; 
+            border: 1px solid var(--accent-color); 
+            color: var(--accent-color); 
+            padding: 10px 20px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            margin-bottom: 30px; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            transition: all 0.3s ease; 
+        }
+        
+        .back-btn:hover { 
+            background-color: var(--accent-color); 
+            color: var(--bg-color); 
+            font-weight: bold; 
+        }
+        
+        .session-title-block { 
+            margin-bottom: 40px; 
+        }
+        
+        .session-title-block h2 { 
+            color: var(--white); 
+            font-size: 2rem; 
         }
 
-        .session-view.active {
+        /* Responsive Masonry Grid */
+        .collage-grid { 
+            column-count: 3; 
+            column-gap: 15px; 
+            width: 100%; 
+        }
+        
+        .collage-item { 
+            background-color: var(--card-bg);
+            margin-bottom: 15px; 
+            break-inside: avoid; 
+            border-radius: 6px; 
+            overflow: hidden; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3); 
+            cursor: zoom-in; 
             display: block;
-            animation: fadeIn 0.4s ease forwards;
+        }
+        
+        .collage-item img { 
+            width: 100%; 
+            height: auto; 
+            display: block; 
+            transition: transform 0.4s ease; 
+        }
+        
+        .collage-item:hover img { 
+            transform: scale(1.03); 
         }
 
-        .back-btn {
-            background: transparent;
-            border: 1px solid var(--accent-color);
-            color: var(--accent-color);
-            padding: 10px 20px;
-            border-radius: 4px;
+        @media (max-width: 900px) {
+            .collage-grid { column-count: 2; }
+        }
+        @media (max-width: 600px) {
+            .collage-grid { column-count: 1; }
+        }
+
+        /* --- ABOUT ME SLIDE PANEL --- */
+        .about-panel {
+            position: fixed;
+            top: 0;
+            right: -450px; /* Hidden offscreen by default */
+            width: 450px;
+            max-width: 100%;
+            height: 100%;
+            background-color: var(--dark-gray);
+            box-shadow: -5px 0 25px rgba(0,0,0,0.7);
+            z-index: 3000;
+            padding: 40px 30px;
+            overflow-y: auto;
+            transition: right 0.4s cubic-bezier(0.05, 0.74, 0.2, 1);
+        }
+
+        .about-panel.open {
+            right: 0;
+        }
+
+        .close-about {
+            font-size: 2rem;
+            color: var(--text-color);
             cursor: pointer;
-            margin-bottom: 30px;
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            transition: color 0.3s ease;
+        }
+
+        .close-about:hover {
+            color: var(--accent-color);
+        }
+
+        .profile-img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin: 30px 0 20px 0;
+            border: 1px solid rgba(102, 252, 241, 0.2);
+        }
+
+        .about-panel h2 {
+            color: var(--white);
+            font-size: 1.8rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            transition: all 0.3s ease;
-        }
-
-        .back-btn:hover {
-            background-color: var(--accent-color);
-            color: var(--bg-color);
-            font-weight: bold;
-        }
-
-        .session-title-block {
-            margin-bottom: 40px;
-        }
-
-        .session-title-block h2 {
-            color: var(--white);
-            font-size: 2rem;
-        }
-
-        /* Real Responsive Masonry - No Image Cropping */
-        .collage-grid {
-            column-count: 3;
-            column-gap: 15px;
-            width: 100%;
-        }
-
-        .collage-item {
-            background-color: var(--card-bg);
             margin-bottom: 15px;
-            break-inside: avoid;
+            border-bottom: 2px solid var(--card-bg);
+            padding-bottom: 10px;
+        }
+
+        .about-panel p {
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            color: #b3b4b5;
+        }
+
+        .about-meta {
+            margin-top: 25px;
+            background-color: var(--card-bg);
+            padding: 15px;
             border-radius: 6px;
-            overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            cursor: zoom-in;
-            display: block;
         }
 
-        .collage-item img {
-            width: 100%;
-            height: auto;
-            display: block;
-            transition: transform 0.4s ease;
+        .about-meta h3 {
+            color: var(--white);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
         }
 
-        .collage-item:hover img {
-            transform: scale(1.03);
+        .about-meta ul {
+            list-style: none;
+            padding: 0;
         }
 
-        /* Responsive Breakpoints for Masonry Columns */
-        @media (max-width: 900px) {
-            .collage-grid {
-                column-count: 2;
-            }
+        .about-meta li {
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+            color: var(--accent-color);
         }
 
-        @media (max-width: 600px) {
-            .collage-grid {
-                column-count: 1;
-            }
-        }
-
-        /* --- LIGHTBOX MODAL --- */
-        .lightbox {
+        /* Backdrop overlay for focus */
+        .overlay-backdrop {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
+            background: rgba(0,0,0,0.6);
+            z-index: 2500;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.4s ease;
         }
 
-        .lightbox.active {
+        .overlay-backdrop.active {
             opacity: 1;
             pointer-events: auto;
         }
 
-        .lightbox-content {
-            max-width: 90%;
-            max-height: 85%;
-            object-fit: contain;
+        /* --- LIGHTBOX MODAL --- */
+        .lightbox { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0, 0, 0, 0.95); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 2000; 
+            opacity: 0; 
+            pointer-events: none; 
+            transition: opacity 0.3s ease; 
+        }
+        
+        .lightbox.active { 
+            opacity: 1; 
+            pointer-events: auto; 
+        }
+        
+        .lightbox-content { 
+            max-width: 90%; 
+            max-height: 85%; 
+            object-fit: contain; 
+        }
+        
+        .lightbox-close { 
+            position: absolute; 
+            top: 25px; 
+            right: 35px; 
+            color: var(--white); 
+            font-size: 45px; 
+            cursor: pointer; 
         }
 
-        .lightbox-close {
-            position: absolute;
-            top: 25px;
-            right: 35px;
-            color: var(--white);
-            font-size: 45px;
-            cursor: pointer;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
         }
     </style>
 </head>
-
 <body>
+
+    <nav>
+        <span class="nav-link" onclick="toggleAbout(true)">About Me</span>
+    </nav>
 
     <div class="container">
         <div id="mainHub">
             <header>
-                <h1>Kalhaar Savaj Photography</h1>
+                <h1>Visual Stories</h1>
                 <p>Select a collection to view the full gallery</p>
             </header>
             <main class="album-grid" id="albumGridContainer"></main>
@@ -241,6 +360,32 @@
                 <h2 id="currentAlbumTitle">Album Name</h2>
             </div>
             <div class="collage-grid" id="collageGridContainer"></div>
+        </div>
+    </div>
+
+    <div id="backdrop" class="overlay-backdrop" onclick="toggleAbout(false)"></div>
+    <div id="aboutPanel" class="about-panel">
+        <span class="close-about" onclick="toggleAbout(false)">&times;</span>
+        
+        <img class="profile-img" src="https://drive.google.com/thumbnail?id=About_me.jpg&sz=w600" id="aboutProfilePic" alt="About Me Profile">
+        
+        <h2>About Me</h2>
+        <p>I am a passionate photographer who loves to see things differently and capture them that way. Backed by 4+ years of extensive field experience in both Smartphone and DSLR-based photography layouts, I focus on capturing the raw textures and authentic visual geometry of moments.</p>
+        
+        <div class="about-meta">
+            <h3>Featured Publications</h3>
+            <p style="font-size:0.85rem; margin-bottom:12px; color:var(--text-color);">My pictures are proudly published across high-tier global features, including:</p>
+            <ul style="margin-bottom:15px;">
+                <li>• National Geographic</li>
+                <li>• CN Traveller India</li>
+                <li>• Inspiro India</li>
+            </ul>
+
+            <h3>Availability & Bookings</h3>
+            <ul>
+                <li>📍 Currently based in Toronto, Canada</li>
+                <li>✈️ Available & open to bookings across the USA</li>
+            </ul>
         </div>
     </div>
 
@@ -805,7 +950,7 @@
 
             GALLERY_DATA.forEach((album, index) => {
                 const coverUrl = `https://drive.google.com/thumbnail?id=${album.coverImageId}&sz=w800`;
-
+                
                 const card = document.createElement('div');
                 card.className = 'album-card';
                 card.onclick = () => openAlbum(index);
@@ -817,12 +962,15 @@
                 `;
                 grid.appendChild(card);
             });
+
+            // Dynamically assign real Image ID to your About image if found inside the array map
+            findAndInjectAboutImage();
         }
 
         function openAlbum(index) {
             const album = GALLERY_DATA[index];
             document.getElementById('mainHub').style.display = 'none';
-
+            
             document.getElementById('currentAlbumTitle').innerText = album.albumTitle;
             const collageContainer = document.getElementById('collageGridContainer');
             collageContainer.innerHTML = '';
@@ -830,12 +978,12 @@
             album.photos.forEach((photo) => {
                 const thumbUrl = `https://drive.google.com/thumbnail?id=${photo.id}&sz=w800`;
                 const fullUrl = `https://drive.google.com/thumbnail?id=${photo.id}&sz=w1600`;
-
+                
                 const item = document.createElement('div');
                 item.className = 'collage-item';
                 item.onclick = () => viewPhoto(fullUrl);
                 item.innerHTML = `<img src="${thumbUrl}" alt="${photo.name}" loading="lazy">`;
-
+                
                 collageContainer.appendChild(item);
             });
 
@@ -858,9 +1006,36 @@
             document.getElementById('lightboxModal').classList.remove('active');
         }
 
+        // About Drawer Slide Animations
+        function toggleAbout(open) {
+            const panel = document.getElementById('aboutPanel');
+            const backdrop = document.getElementById('backdrop');
+            if (open) {
+                panel.classList.add('open');
+                backdrop.classList.add('active');
+            } else {
+                panel.classList.remove('open');
+                backdrop.classList.remove('active');
+            }
+        }
+
+        // Automated utility script to scan your parsed array and map the real alphanumeric ID of About_me.jpg
+        function findAndInjectAboutImage() {
+            let foundId = null;
+            for (let album of GALLERY_DATA) {
+                let match = album.photos.find(p => p.name.toLowerCase() === "about_me.jpg");
+                if (match) {
+                    foundId = match.id;
+                    break;
+                }
+            }
+            if (foundId) {
+                document.getElementById('aboutProfilePic').src = `https://drive.google.com/thumbnail?id=${foundId}&sz=w800`;
+            }
+        }
+
         // Initialize Layout on Window Load
         document.addEventListener("DOMContentLoaded", renderPortfolioHub);
     </script>
 </body>
-
 </html>
